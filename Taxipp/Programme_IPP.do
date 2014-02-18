@@ -292,7 +292,7 @@ replace rfin_div_bar_irpp = ${f2dc} /*+  ${f2fu} */
 replace rfin_int_bar_irpp = /*${f2ts} + ${f2go} +*/ ${f2tr}
 replace rfin_pv_normal_irpp = ${f3vg}
 replace rfon_normal_irpp = ${f4ba}
-gen actifnetISF = 0
+gen actifnetISF = ${actifnetISF}
  
 so id_foyf
 sort id_indiv
@@ -372,11 +372,11 @@ use "$repo\base_IPP_input_${scenario}_${date}.dta", clear
 cap drop dic_scenar 
 drop if pac == 1
 
-do "$taxipp_encours\3-Programmes\1-cotsoc OF.do"
-qui    do "$taxipp_encours\3-Programmes\2-irpp OF.do"
+qui do "$taxipp_encours\3-Programmes\1-cotsoc OF.do"
+qui do "$taxipp_encours\3-Programmes\2-irpp OF.do"
 qui do "$progdir\3-revcap.do"
-   do "$taxipp_encours\3-Programmes\4-prestations OF.do"
-qui do "$progdir\5-isf.do"
+qui do "$taxipp_encours\3-Programmes\4-prestations OF.do"
+qui do "$taxipp_encours\3-Programmes\5-isf OF.do"
 qui do "$taxipp_encours\3-Programmes\6-bouclier_fiscal OF.do"
  
 drop id_conj -loyer_verse_men rfon_fictif_cn-reduc_irpp 

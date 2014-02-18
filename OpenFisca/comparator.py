@@ -81,7 +81,7 @@ class Comparison_cases(object):
                            'nb_enf' : 0, 'nb_enf_C': 0, 'age_enf': -10,  'rev_max': 100000, 'part_rev': 1, 'loyer_mensuel_menage': 1000, 
                            'age' : 38, 'activite': 0, 'cadre': 0, 'public' : 0, 'nbh_sal': 151.67*12, 'taille_ent' : 5, 'tva_ent' : 0, 'nbj_nonsal': 0,
                            'age_C' : 38,'activite_C': 0, 'cadre_C': 0, 'public_C' : 0, 'nbh_sal_C': 151.67*12, 'taille_ent_C' : 5, 'tva_ent_C' : 0, 'nbj_nonsal_C': 0,
-                           'f2dc' : 0, 'f2tr': 0, 'f3vg':0, 'f4ba':0, 'ISF' : 0, 'caseT': 0, 'caseEKL' : 0
+                           'f2dc' : 0, 'f2tr': 0, 'f3vg':0, 'f4ba':0, 'ISF' : 0, 'caseT': 0, 'caseEKL' : 0, 'actifnetISF' : 0,
                            }
             
             for key in dic_default.keys():                     
@@ -210,7 +210,7 @@ def dic_ipp2of():
     ipp2of_output_variables =  _dic_corresp('output')
     return ipp2of_input_variables, ipp2of_output_variables
 
-def compare(path_dta_output, openfisca_output, dic_ipp2of_output_variables, param_scenario, simulation, threshold = 1.5, verbose = True):
+def compare(path_dta_output, openfisca_output, dic_ipp2of_output_variables, param_scenario, simulation, threshold = 1, verbose = True):
     '''
     Fonction qui comparent les calculs d'OF et et de TaxIPP
     Gestion des outputs
@@ -233,14 +233,14 @@ def compare(path_dta_output, openfisca_output, dic_ipp2of_output_variables, para
     else:
         act_conj = 0
 
-    check_list_commun = ['isf_foy', 'irpp_net_foy', 'irpp_bar_foy', 'ppe_brut_foy', 'ppe_net_foy',  'irpp_ds_foy'] ## 'decote_irpp_foy',
+    check_list_commun = ['irpp_net_foy', 'irpp_bar_foy', 'ppe_brut_foy', 'ppe_net_foy',  'irpp_ds_foy'] ## 'decote_irpp_foy',
     check_list_minima = ['rsa_foys', 'rsa_act_foys', 'mv_foys', 'rsa_logt', 'y_rmi_rsa']
     check_list_af =['paje_foys', 'paje_base_foys', 'paje_clca_foys', 'af_foys',  'nenf_prest', 'biact_or_isole', 'alf_foys', 'ars_foys', 'asf_foys','api', 'apje_foys'] #'af_diff', 'af_maj',
     check_list_sal =  ['csp_exo','csg_sal_ded', 'css', 'css_co', 'css_nco', 'crds_sal', 'csg_sal_nonded', 'sal_irpp', 'sal_brut','csp_mo_vt','csp_nco', 'csp_co','vt','mo', 'sal_superbrut', 'sal_net','ts', 'tehr'] # 'csg_sal_ded'] #, 'irpp_net_foy', 'af_foys']- cotisations salariales : 'css', 'css_nco', 'css_co', 'sal_superbrut' 'csp',
     # 'decote_irpp_foy' : remarque par d'équivalence Taxipp
     check_list_chom =  ['csg_chom_ded', 'chom_irpp', 'chom_brut', 'csg_chom_nonded', 'crds_chom']
     check_list_ret =  ['csg_pens_ded', 'pension_irpp', 'pension_net', 'csg_pens_nonded', 'crds_pens']
-    check_list_cap = ['isf_foy', 'isf_brut_foy', 'isf_net_foy', 'csg_patr_foy','crds_patr_foy','csk_patr_foy','csg_plac_foy','crds_plac_foy','csk_plac_foy'] 
+    check_list_cap = ['isf_foy', 'isf_brut_foy', 'isf_net_foy', 'csg_patr_foy','crds_patr_foy','csk_patr_foy','csg_plac_foy','crds_plac_foy','csk_plac_foy', 'sommeimpots_plafISF', 'sommerevenus_plafISF'] 
     
     if 'salbrut' in param_scenario.items() :
         if param_scenario['option'] == 'salbrut':
@@ -487,12 +487,16 @@ def build_input_OF(data, dic_var):
 def run():
     logging.basicConfig(level=logging.ERROR, stream=sys.stdout)
     param_scenario0 = {'scenario': 'celib', 'date':  time.strftime('%d-%m-%y %Hh',time.localtime()), 'nb_enf' : 0, 'nmen':10, 'rev_max': 12*4000, 'activite':0, 'option': 'sali', 'cadre': 0}#, 'option': 'salbrut', , 'public' : 1
-    param_scenario1 = {'scenario': 'concubin', 'date':  time.strftime('%d-%m-%y %Hh',time.localtime()), 'nb_enf' : 0, 'nmen':20, 'rev_max': 20000, 'part_rev': 0.75, 'activite':0,  'activite_C':1,'option': 'sali'} #'age' :75, 'age_C':60,
+    param_scenario1 = {'scenario': 'concubin', 'date':  'actif-chomeur', 'nb_enf' : 0, 'nmen':20, 'rev_max': 240000, 'part_rev': 0.75, 'activite':0,  'activite_C':1,'option': 'sali'} #'age' :75, 'age_C':60,
+    param_scenario_old = {'scenario': 'concubin', 'date':  'retraites', 'nb_enf' : 0, 'nmen':5, 'rev_max': 40000, 'part_rev': 0.75, 'activite':3, 'age':80, 'age_C':75, 'activite_C':3,'option': 'sali'} #'age' :75, 'age_C':60,
     param_scenario2 = {'scenario': 'concubin', 'date':  time.strftime('%d-%m-%y %Hh',time.localtime()), 'nb_enf' : 3, 'nb_enf_C':1, 'age_enf': [17,8,2],   'part_rev': 0.75, 'nmen':10, 'rev_max': 50000, 'activite':1, 'activite_C': 0, 'option': 'sali'} 
     param_scenario3 = {'scenario': 'concubin', 'date':  time.strftime('%d-%m-%y %Hh',time.localtime()), 'nb_enf' : 5, 'age_enf': [1,16,12,17,0], 'part_rev': 0.75, 'nmen':10, 'rev_max': 150000, 'activite':0, 'cadre': 1, 'activite_C': 1, 'cadre_C': 1, 'option': 'sali'} 
     param_scenario_cap1 = {'scenario': 'celib', 'date':  time.strftime('%d-%m-%y %Hh',time.localtime()), 'nb_enf' : 0, 'nmen':10, 'rev_max': 10000,'activite':0,'f4dc' : 40000} #'f2dc' : 0, 'f2tr': 0, 'f3vg':0, 'f4ba':0, 'ISF' : 0
-    param_scenario_isf = {'scenario': 'celib', 'date':  time.strftime('%d-%m-%y %Hh',time.localtime()), 'nb_enf': 0, 'nmen':10, 'rev_max': 12*4000, 'actifnetIS' : 1500000}
-    hop = Comparison_cases(2013, param_scenario_isf)
+    param_scenario_isf = {'scenario': 'celib', 'date':  time.strftime('%d-%m-%y %Hh',time.localtime()), 'nb_enf': 0, 'nmen':10, 'rev_max': 12*4000, 'actifnetISF' : 1500000}
+    param_scenario_pauvres = {'scenario': 'concubin', 'date':  'pauvres', 'nb_enf' : 3, 'nb_enf_C':1, 'age_enf': [17,8,2],   'part_rev': 0.4, 'nmen':10, 'rev_max': 40000, 'activite':1, 'activite_C': 0, 'option': 'sali'}
+    param_scenario_aise = {'scenario': 'marie', 'date':  'aise', 'nb_enf' : 3, 'age_enf': [17,8,2],  'part_rev': 0.75, 'nmen':10, 'rev_max': 160000,  'f2dc': 5000} #, 'f2tr': 5000, 'f3vg': 5000, 'f4br': 5000 'actifnetISF': 2000000,} 
+    param_scenario_aise2 = {'scenario': 'celib', 'date':  'aise', 'nmen':10, 'rev_max': 160000,'f2dc': 5000 }
+    hop = Comparison_cases(2013, param_scenario_aise2)
     hop.run_all()#run_stata= False)
     
 
